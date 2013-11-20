@@ -5,12 +5,19 @@ import settings
 # based on https://www.beeminder.com/api
 
 class Beeminder:
-  def __init__(self, this_auth_token):
-    self.auth_token=this_auth_token
+  def __init__(self, this_auth_token=None, username=None):
+    if this_auth_token: 
+        self.auth_token=this_auth_token
+    else:
+        self.auth_token = settings.BEEMINDER_AUTH_TOKEN
+    if username:
+        self.username = settings.username
+    else:
+        self.username = settings.BEEMINDER_USERNAME
     self.base_url='https://www.beeminder.com/api/v1'
 
-  def get_user(self,username):
-    url = "%s/users/%s.json" % (self.base_url,username)
+  def get_user(self,username=None):
+    url = "%s/users/%s.json" % (self.base_url,username or self.username)
     values = {'auth_token':self.auth_token}
     result = self.call_api(url,values,'GET')
     return result
@@ -45,3 +52,9 @@ class Beeminder:
       response = urllib2.urlopen(url+'?'+data)
     result=response.read()
     return result
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 4:
+        bee = Beeminder()
+        bee.create_datapoint(*sys.argv[1:])
+
